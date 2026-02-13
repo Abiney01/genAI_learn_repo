@@ -57,3 +57,8 @@ Thumbs.db
 dmypy.json
 .ruff_cache/
 .pylint_cache/
+
+# folders
+agent_project
+# files
+Unit 4.pdf
