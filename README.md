@@ -14,6 +14,7 @@ A comprehensive collection of AI agent projects demonstrating various prompt eng
   - [Hello AI](#hello-ai)
   - [Prompts](#prompts)
   - [Agent CLI](#agent-cli)
+  - [LangGraph Learn](#langgraph-learn)
   - [Weather Project](#weather-project)
   - [Image Analysis](#image-analysis)
   - [RAG System](#rag-system)
@@ -45,6 +46,7 @@ agentic_ai_repo/
 ├── hello_ai/                  # Basic LLM integration examples
 ├── prompts/                   # Prompt engineering techniques showcase
 ├── agent_cli/                 # CLI-based AI agent
+├── langraph_learn/            # LangGraph state management & workflow patterns
 ├── weather_project/           # Tool-calling weather agent
 ├── image/                     # Image analysis using vision models
 ├── rag/                       # RAG system with Qdrant vector database
@@ -92,6 +94,7 @@ docker-compose -f rag_queue/docker-compose.yml up -d
 | **Hello AI** | [hello_ai/](hello_ai/) | Basic Gemini API integration | `cd hello_ai && python main.py` |
 | **Prompts** | [prompts/](prompts/) | Zero-shot, Few-shot, CoT, Persona | `python prompts/zero_shot.py` |
 | **Agent CLI** | [agent_cli/](agent_cli/) | CLI agent for file/folder creation | `cd agent_cli && python vibe_code.py` |
+| **LangGraph Learn** | [langraph_learn/](langraph_learn/) | State management & workflow orchestration with LangGraph | `cd langraph_learn && python sample_chat.py` |
 | **Weather** | [weather_project/](weather_project/) | Tool-calling weather agent | `cd weather_project && python agent.py` |
 | **Image Analysis** | [image/](image/) | Vision model for image description | `cd image && python main.py` |
 | **RAG System** | [rag/](rag/) | Semantic search on PDF documents | `docker-compose -f rag/docker-compose.yml up -d && python rag/index.py && python rag/chat.py` |
@@ -107,6 +110,7 @@ docker-compose -f rag_queue/docker-compose.yml up -d
 |----------|--------------|
 | **Languages** | Python 3.9+ |
 | **LLM APIs** | Google Gemini, OpenAI, LangChain |
+| **Graph Framework** | LangGraph |
 | **Web Framework** | FastAPI, Uvicorn |
 | **Data & Validation** | Pydantic, Marshmallow |
 | **Vector Database** | Qdrant |
