@@ -17,6 +17,7 @@ A comprehensive collection of AI agent projects demonstrating various prompt eng
   - [LangGraph Learn](#langgraph-learn)
   - [Weather Project](#weather-project)
   - [Image Analysis](#image-analysis)
+  - [Mem0](#mem0)
   - [RAG System](#rag-system)
   - [RAG Queue](#rag-queue)
   - [Tokenization](#tokenization)
@@ -49,6 +50,7 @@ agentic_ai_repo/
 ├── langraph_learn/            # LangGraph state management & workflow patterns
 ├── weather_project/           # Tool-calling weather agent
 ├── image/                     # Image analysis using vision models
+├── mem0/                      # Memory system for LLM conversation retention
 ├── rag/                       # RAG system with Qdrant vector database
 ├── rag_queue/                 # Async RAG with Redis queue
 ├── tokenization/              # Token encoding/decoding utilities
@@ -97,6 +99,7 @@ docker-compose -f rag_queue/docker-compose.yml up -d
 | **LangGraph Learn** | [langraph_learn/](langraph_learn/) | State management & workflow orchestration with LangGraph | `cd langraph_learn && python sample_chat.py` |
 | **Weather** | [weather_project/](weather_project/) | Tool-calling weather agent | `cd weather_project && python agent.py` |
 | **Image Analysis** | [image/](image/) | Vision model for image description | `cd image && python main.py` |
+| **Mem0** | [mem0/](mem0/) | LLM conversation memory & context retention | `docker-compose -f mem0/docker-compose.yml up -d && cd mem0 && python mem.py` |
 | **RAG System** | [rag/](rag/) | Semantic search on PDF documents | `docker-compose -f rag/docker-compose.yml up -d && python rag/index.py && python rag/chat.py` |
 | **RAG Queue** | [rag_queue/](rag_queue/) | Async RAG with Redis queue | `docker-compose -f rag_queue/docker-compose.yml up -d && python rag_queue/main.py` |
 | **Tokenization** | [tokenization/](tokenization/) | Token encoding/decoding | `cd tokenization && python main.py` |
