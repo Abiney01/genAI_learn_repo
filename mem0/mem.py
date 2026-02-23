@@ -14,6 +14,11 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 os.environ["GOOGLE_API_KEY"] = GEMINI_API_KEY
 
+NEO4J_URI = os.getenv("NEO4J_URI")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE")
+
 # setting up config for our mem
 config = {
     "version" : "v1.1",
@@ -27,6 +32,15 @@ config = {
         "provider" : "gemini",
         "config" : {"model":"gemini-3-flash-preview"}
         },
+    # config for graph store using ne04j
+    "graph_store" : {
+        "provider" : "neo4j" ,
+        "config" : {
+            "url" : NEO4J_URI,
+            "username" : NEO4J_USERNAME,
+            "password" : NEO4J_PASSWORD
+        }
+    },
     "vector_store" : {
         "provider" : "qdrant",
         "config" : {
