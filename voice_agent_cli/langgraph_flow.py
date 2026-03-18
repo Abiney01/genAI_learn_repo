@@ -1,9 +1,13 @@
 import speech_to_text as STT
 from langgraph.graph import StateGraph
-from typing import TypedDict
-class State(dict):
+from typing import TypedDict, Dict, Any
+from langgraph.checkpoint.mongodb import MongoDBSaver
+from llm_client import generate_command
+from executor import execute_command
+
+class State(TypedDict):
     text : str
-    intent : str
+    llm_output: Dict[str, Any]
 
 def input_node(state):
     print("Input Received",state.get("text","No text found"))
@@ -23,17 +27,20 @@ def parser_node(state):
     return state
 
 def router_node(state):
-    intent = state["intent"]
-    if intent == "create_file":
-        print("📁 Action: Creating file...")
-    elif intent == "run_code":
-        print("⚙️ Action: Running code...")
-    else:
-        print("❓ Unknown command")
+    user_text = state["text"]
+    result = generate_command(user_text)
+    print("\n🤖 Gemini Structured Output:\n", result)
+    try:
+        command = result["arguments"]["command"]
+    except:
+        print("❌ Invalid LLM response")
+        return state
+    execute_command(command)
 
+    state["command"] = command
     return state
 
-def build_graph():
+def build_graph(checkpointer=None):
     graph = StateGraph(State)
     graph.add_node("input",input_node)
     graph.add_node("parser",parser_node)
@@ -43,4 +50,4 @@ def build_graph():
     graph.add_edge('input','parser')
     graph.add_edge('parser','router')
 
-    return graph.compile()
+    return graph.compile(checkpointer=checkpointer)

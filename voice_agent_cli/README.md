@@ -11,15 +11,17 @@ This project aims to build a **voice-driven AI agent** that:
 * 🎤 Captures voice input
 * 🔤 Converts speech → text (Google Speech Recognition)
 * 🧠 Processes commands using LangGraph (node-based workflow)
-* ⚙️ Executes actions based on detected intent
-* 🔄 Runs continuously like a CLI tool
+* 🤖 Generates safe shell commands using LLM (OpenAI/Gemini)
+* ⚙️ Executes actions with built-in safety checks
+* 💾 Maintains persistent state via MongoDB
+* 🔄 Runs continuously as an interactive CLI tool
 
 ---
 
 ## 🧱 Current Architecture
 
 ```
-Voice Input → Speech-to-Text → LangGraph Flow → Action Execution
+Voice Input → Speech-to-Text → LangGraph Flow → LLM Command Generation → Safe Execution → MongoDB Persistence
 ```
 
 ---
@@ -31,7 +33,12 @@ voice_agent_cli/
 │
 ├── speech_to_text.py   # Handles microphone input & speech recognition
 ├── langgraph_flow.py   # Defines LangGraph nodes & workflow
-└── main.py             # Entry point (connects voice + graph)
+├── llm_client.py       # Generates shell commands using LLM (OpenAI/Gemini)
+├── executor.py         # Executes commands with safety checks
+├── main.py             # Entry point (connects voice + graph)
+├── test_mic.py         # Microphone testing utility
+├── test_mongo.py       # MongoDB checkpoint testing
+└── .env                # Environment variables (API keys)
 ```
 
 ---
@@ -42,8 +49,9 @@ voice_agent_cli/
 | ---------------- | --------------------------- |
 | Speech Input     | SpeechRecognition + PyAudio |
 | AI Workflow      | LangGraph                   |
+| LLM Provider     | OpenAI/Google Gemini API    |
 | Backend Language | Python                      |
-| (Upcoming) DB    | MongoDB (for checkpointing) |
+| Database         | MongoDB (checkpointing)     |
 
 ---
 
@@ -68,36 +76,43 @@ voice_agent_cli/
 
 ---
 
-### ✅ 3. LangGraph Workflow
+### ✅ 3. LLM-Powered Command Generation
+
+- Uses OpenAI/Gemini API to convert natural language to shell commands
+- System prompt ensures safe, reversible operations
+- Windows command prompt compatible
+- Returns structured JSON responses
+
+---
+
+### ✅ 4. LangGraph Workflow
 
 * Node-based architecture
 * Current nodes:
 
   * **Input Node** → receives text
-  * **Parser Node** → detects intent
-  * **Router Node** → decides action
+  * **Parser Node** → detects intent (basic fallback)
+  * **Router Node** → generates & executes commands via LLM
 
 ---
 
-### ✅ 4. Intent Detection (Basic NLP)
+### ✅ 5. MongoDB Checkpointing
 
-Supported commands:
-
-| Voice Input   | Detected Intent |
-| ------------- | --------------- |
-| "create file" | create_file     |
-| "run code"    | run_code        |
-| anything else | unknown         |
+- Persistent state management
+- Thread-based session tracking
+- Enables conversation continuity across runs
 
 ---
 
-### ✅ 5. Modular Code Structure
+### ✅ 6. Modular Code Structure
 
 * Clean separation of concerns:
 
-  * Voice handling
-  * Logic processing
-  * Main execution loop
+  * Voice handling (speech_to_text.py)
+  * LLM integration (llm_client.py)
+  * Command execution (executor.py)
+  * Workflow logic (langgraph_flow.py)
+  * Main execution loop (main.py)
 
 ---
 
@@ -123,9 +138,7 @@ venv\Scripts\activate
 ### 3. Install Dependencies
 
 ```bash
-pip install SpeechRecognition
-pip install pyaudio
-pip install langgraph langchain pymongo
+pip install SpeechRecognition pyaudio langgraph langchain pymongo python-dotenv openai
 ```
 
 > ⚠️ If PyAudio fails on Windows:
@@ -137,7 +150,32 @@ pipwin install pyaudio
 
 ---
 
-### 4. Run the Project
+### 4. Set Up Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+GEMINI_API_KEY=your_google_gemini_api_key_here
+```
+
+Or use OpenAI:
+
+```env
+GEMINI_API_KEY=your_openai_api_key_here
+```
+
+---
+
+### 5. Start MongoDB (Optional for checkpointing)
+
+```bash
+# Using Docker
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
+
+---
+
+### 6. Run the Project
 
 ```bash
 python main.py
@@ -149,30 +187,53 @@ python main.py
 
 ```
 🎤 Listening...
-You: create file
+You: "create a new file called hello.py"
 
-📥 Input received: create file
-🧠 Parsed intent: create_file
-📁 Action: Creating file...
+📥 Input received: "create a new file called hello.py"
+🤖 Gemini Structured Output:
+{
+  "tool": "execute_command",
+  "arguments": {
+    "command": "echo. > hello.py"
+  }
+}
+⚡ Executing...
+✅ Done
+
+You: "list files in current directory"
+🤖 Gemini Structured Output:
+{
+  "tool": "execute_command",
+  "arguments": {
+    "command": "dir"
+  }
+}
+⚡ Executing...
+✅ Done
+
+You: "exit"
+Exiting CLI...
 ```
 
 ---
 
 ## ⚠️ Known Limitations
 
-* Basic keyword-based intent detection (no advanced NLP yet)
-* No real file execution yet (only simulated actions)
-* No persistence (MongoDB not integrated yet)
+* Limited built-in safety measures (rely on LLM's system prompt and blocked keywords)
+* Microphone input requires audio device
+* MongoDB checkpoint requires local MongoDB instance (optional)
+* Blocked keywords list is not fully comprehensive
 
 ---
 
 ## 🔴 Upcoming Features
 
-* 🔥 MongoDB checkpointing (state persistence)
-* 🧠 Advanced intent parsing (LLM / smarter NLP)
-* ⚙️ Real command execution (file creation, script running)
-* 🗣️ Text-to-speech responses
-* 📦 CLI packaging (installable tool)
+* �️ Text-to-speech responses (voice feedback)
+* 🧠 Enhanced intent parsing with conversation memory
+* 🔐 Improved safety mechanisms (sandboxed execution mode)
+* 📦 CLI packaging (installable tool via pip)
+* 🎯 Task automation workflows (multi-step operations)
+* 🔗 Integration with external APIs (GitHub, cloud services)
 
 ---
 
@@ -195,5 +256,11 @@ Built as part of an **Agentic AI system project**.
 
 ## 📌 Status
 
-🟡 **In Progress — Phase 2 (LangGraph Integration Completed)**
-🔜 Next: MongoDB Checkpointing
+� **Phase 3 (Current) — LLM-Powered Execution**
+- ✅ Voice input → Text conversion
+- ✅ LLM-based command generation (OpenAI/Gemini)
+- ✅ Safe command execution with keyword blocking
+- ✅ MongoDB checkpointing & persistence
+- ✅ LangGraph workflow integration
+
+🔜 Next: Text-to-speech responses & enhanced safety
