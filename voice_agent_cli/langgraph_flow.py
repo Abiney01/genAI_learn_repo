@@ -1,53 +1,94 @@
-import speech_to_text as STT
 from langgraph.graph import StateGraph
 from typing import TypedDict, Dict, Any
-from langgraph.checkpoint.mongodb import MongoDBSaver
 from llm_client import generate_command
-from executor import execute_command
+from executor import execute_plan
+
 
 class State(TypedDict):
-    text : str
-    llm_output: Dict[str, Any]
+    text: str
+    plan: Dict[str, Any]
+    result: str
+    error: str
 
+
+# 🟢 Input Node
 def input_node(state):
-    print("Input Received",state.get("text","No text found"))
+    print("🎤 Input:", state.get("text"))
     return state
 
-def parser_node(state):
-    text = state["text"]
-    if "create" in text:
-        intent = "create_file"
-    elif "run" in text:
-        intent = "run_code"
-    else:
-        intent = "unknown"
 
-    state["intent"] = intent
-    print("Parsed intent",intent)
-    return state
-
-def router_node(state):
+# 🧠 Planner Node (LLM)
+def planner_node(state):
     user_text = state["text"]
-    result = generate_command(user_text)
-    print("\n🤖 Gemini Structured Output:\n", result)
-    try:
-        command = result["arguments"]["command"]
-    except:
-        print("❌ Invalid LLM response")
-        return state
-    execute_command(command)
 
-    state["command"] = command
+    result = generate_command(user_text)
+    print("\n🧠 LLM Output:\n", result)
+
+    if result.get("action") == "none":
+        state["error"] = "invalid_or_unsafe_request"
+        return state
+
+    state["plan"] = result
     return state
 
+
+# 🔐 Validator Node
+ALLOWED_ACTIONS = ["create_file", "create_folder", "list_files"]
+
+
+def validator_node(state):
+    if "error" in state:
+        return state
+
+    plan = state.get("plan", {})
+    action = plan.get("action")
+
+    if action not in ALLOWED_ACTIONS:
+        print(f"🚫 Invalid action: {action}")
+        state["error"] = "invalid_action"
+        return state
+
+    target = plan.get("target", "")
+
+    if target:
+        if ".." in target or target.startswith("/") or ":" in target:
+            print("🚫 Unsafe path detected")
+            state["error"] = "unsafe_path"
+            return state
+
+    print("✅ Validation Passed")
+    return state
+
+
+# ⚙️ Executor Node
+def executor_node(state):
+    if "error" in state:
+        print("⚠️ Execution skipped:", state["error"])
+        return state
+
+    plan = state["plan"]
+
+    print(f"⚙️ Executing: {plan}")
+    result = execute_plan(plan)
+
+    print(result)
+    state["result"] = result
+    return state
+
+
+# 🔄 Build Graph
 def build_graph(checkpointer=None):
     graph = StateGraph(State)
-    graph.add_node("input",input_node)
-    graph.add_node("parser",parser_node)
-    graph.add_node("router",router_node)
+
+    graph.add_node("input", input_node)
+    graph.add_node("planner", planner_node)
+    graph.add_node("validator", validator_node)
+    graph.add_node("executor", executor_node)
 
     graph.set_entry_point("input")
-    graph.add_edge('input','parser')
-    graph.add_edge('parser','router')
+
+    graph.add_edge("input", "planner")
+    graph.add_edge("planner", "validator")
+    graph.add_edge("validator", "executor")
 
     return graph.compile(checkpointer=checkpointer)

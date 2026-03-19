@@ -9,7 +9,7 @@ def listen_command():
     try:
         print("Recognizing")
         text = recognizer.recognize_google(audio)
-        print("You said :",text)
+        # print("You said :",text)
         return text.lower()
     except:
         print("Couldn't recognize audio")

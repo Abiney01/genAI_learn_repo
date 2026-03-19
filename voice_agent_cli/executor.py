@@ -1,36 +1,49 @@
 import os
 
-# ❌ Commands we DO NOT auto-execute
-BLOCKED_KEYWORDS = [
-    "npm start",
-    "npm run",
-    "python app.py",
-    "python main.py",
-    "uvicorn",
-    "flask run",
-    "streamlit run"
-]
+BASE_DIR = "./workspace"
+
+# Ensure workspace exists
+os.makedirs(BASE_DIR, exist_ok=True)
 
 
-def is_safe_to_execute(command: str) -> bool:
-    for keyword in BLOCKED_KEYWORDS:
-        if keyword in command.lower():
-            return False
-    return True
+def safe_path(path: str):
+    if not path:
+        return None
+
+    if ".." in path or path.startswith("/") or ":" in path:
+        return None
+
+    return os.path.join(BASE_DIR, path)
 
 
-def execute_command(command: str):
-    print(f"\n🛠 Command: {command}")
+def execute_plan(plan: dict):
+    action = plan.get("action")
+    target = plan.get("target", "")
+    content = plan.get("content", "")
 
-    if not is_safe_to_execute(command):
-        print("⚠️ Skipped execution (manual run required)")
-        return
+    path = safe_path(target)
 
-    print("⚡ Executing...\n")
+    if action == "create_file":
+        if not path:
+            return "❌ Unsafe file path"
 
-    try:
-        result = os.system(command)
-        print("✅ Done\n")
-        return result
-    except Exception as e:
-        print(f"❌ Execution error: {e}")
+        with open(path, "w") as f:
+            f.write(content or "")
+
+        return f"✅ File created: {target}"
+
+    elif action == "create_folder":
+        if not path:
+            return "❌ Unsafe folder path"
+
+        os.makedirs(path, exist_ok=True)
+        return f"✅ Folder created: {target}"
+
+    elif action == "list_files":
+        files = os.listdir(BASE_DIR)
+        return f"📂 Files: {files}"
+
+    elif action == "none":
+        return "⚠️ No valid action from LLM"
+
+    return "❌ Unknown action"

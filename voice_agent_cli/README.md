@@ -11,8 +11,8 @@ This project aims to build a **voice-driven AI agent** that:
 * 🎤 Captures voice input
 * 🔤 Converts speech → text (Google Speech Recognition)
 * 🧠 Processes commands using LangGraph (node-based workflow)
-* 🤖 Generates safe shell commands using LLM (OpenAI/Gemini)
-* ⚙️ Executes actions with built-in safety checks
+* 🤖 Generates safe action plans using LLM (OpenAI/Gemini)
+* ⚙️ Executes file operations with built-in safety checks
 * 💾 Maintains persistent state via MongoDB
 * 🔄 Runs continuously as an interactive CLI tool
 
@@ -21,7 +21,7 @@ This project aims to build a **voice-driven AI agent** that:
 ## 🧱 Current Architecture
 
 ```
-Voice Input → Speech-to-Text → LangGraph Flow → LLM Command Generation → Safe Execution → MongoDB Persistence
+Voice Input → Speech-to-Text → LangGraph Flow → LLM Plan Generation → Validation → Safe Execution → MongoDB Persistence
 ```
 
 ---
@@ -33,8 +33,8 @@ voice_agent_cli/
 │
 ├── speech_to_text.py   # Handles microphone input & speech recognition
 ├── langgraph_flow.py   # Defines LangGraph nodes & workflow
-├── llm_client.py       # Generates shell commands using LLM (OpenAI/Gemini)
-├── executor.py         # Executes commands with safety checks
+├── llm_client.py       # Generates action plans using LLM (OpenAI/Gemini)
+├── executor.py         # Executes file operations with safety checks
 ├── main.py             # Entry point (connects voice + graph)
 ├── test_mic.py         # Microphone testing utility
 ├── test_mongo.py       # MongoDB checkpoint testing
@@ -76,12 +76,11 @@ voice_agent_cli/
 
 ---
 
-### ✅ 3. LLM-Powered Command Generation
+### ✅ 3. LLM-Powered Action Planning
 
-- Uses OpenAI/Gemini API to convert natural language to shell commands
+- Uses OpenAI/Gemini API to convert natural language to structured action plans
 - System prompt ensures safe, reversible operations
-- Windows command prompt compatible
-- Returns structured JSON responses
+- Returns structured JSON responses with actions, targets, and content
 
 ---
 
@@ -90,9 +89,10 @@ voice_agent_cli/
 * Node-based architecture
 * Current nodes:
 
-  * **Input Node** → receives text
-  * **Parser Node** → detects intent (basic fallback)
-  * **Router Node** → generates & executes commands via LLM
+  * **Input Node** → receives and logs text
+  * **Planner Node** → generates action plans via LLM
+  * **Validator Node** → checks action safety and path validity
+  * **Executor Node** → performs file operations in isolated workspace
 
 ---
 
