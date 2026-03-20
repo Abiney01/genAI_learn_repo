@@ -9,6 +9,7 @@ class State(TypedDict):
     plan: Dict[str, Any]
     result: str
     error: str
+    history : list
 
 
 # 🟢 Input Node
@@ -20,8 +21,22 @@ def input_node(state):
 # 🧠 Planner Node (LLM)
 def planner_node(state):
     user_text = state["text"]
+    history = state.get("history",[])
+    # 🧠 Convert history into readable format
+    history_text = ""
+    for item in history:
+        history_text += f"- {item['action']} → {item.get('target', '')}\n"
 
-    result = generate_command(user_text)
+    enhanced_input = f"""
+    Previous actions:
+    {history_text}
+
+    User request:
+    {user_text}
+    """
+
+
+    result = generate_command(enhanced_input)
     print("\n🧠 LLM Output:\n", result)
 
     if result.get("action") == "none":
@@ -33,7 +48,15 @@ def planner_node(state):
 
 
 # 🔐 Validator Node
-ALLOWED_ACTIONS = ["create_file", "create_folder", "list_files"]
+ALLOWED_ACTIONS = [
+    "create_file",
+    "create_folder",
+    "list_files",
+    "rename_file",
+    "rename_folder",
+    "append_file",
+    "overwrite_file"
+]
 
 
 def validator_node(state):
@@ -72,6 +95,15 @@ def executor_node(state):
     result = execute_plan(plan)
 
     print(result)
+     # 🧠 Store memory
+    history = state.get("history", [])
+    history.append({
+        "action": plan.get("action"),
+        "target": plan.get("target")
+    })
+
+    # Keep only last 5 actions 
+    state["history"] = history[-5:]
     state["result"] = result
     return state
 

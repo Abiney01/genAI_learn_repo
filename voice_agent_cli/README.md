@@ -116,6 +116,13 @@ voice_agent_cli/
 
 ---
 
+### ✅ 7. Conversation History
+
+- Maintains history of last 5 actions
+- Provides context to LLM for better planning
+
+---
+
 ## ▶️ How to Run
 
 ### 1. Clone / Navigate to Project
@@ -154,15 +161,19 @@ pipwin install pyaudio
 
 Create a `.env` file in the project root:
 
+For Google Gemini:
+
 ```env
 GEMINI_API_KEY=your_google_gemini_api_key_here
 ```
 
-Or use OpenAI:
+For OpenAI:
 
 ```env
-GEMINI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
+
+> Note: The current code is configured to use Gemini API via OpenAI client. To switch to OpenAI, update the `llm_client.py` accordingly.
 
 ---
 
@@ -186,33 +197,38 @@ python main.py
 ## 🧪 Example Usage
 
 ```
-🎤 Listening...
+�️ Voice CLI Agent Started (say 'exit' to quit)
+
+Speak something...
+Recognizing
 You: "create a new file called hello.py"
 
-📥 Input received: "create a new file called hello.py"
-🤖 Gemini Structured Output:
-{
-  "tool": "execute_command",
-  "arguments": {
-    "command": "echo. > hello.py"
-  }
-}
-⚡ Executing...
-✅ Done
+🎤 Input: create a new file called hello.py
+🧠 LLM Output:
+{"action": "create_file", "target": "hello.py", "content": ""}
+✅ Validation Passed
+⚙️ Executing: {'action': 'create_file', 'target': 'hello.py', 'content': ''}
+✅ File created: hello.py
 
+✅ Result: ✅ File created: hello.py
+
+Speak something...
+Recognizing
 You: "list files in current directory"
-🤖 Gemini Structured Output:
-{
-  "tool": "execute_command",
-  "arguments": {
-    "command": "dir"
-  }
-}
-⚡ Executing...
-✅ Done
 
+🎤 Input: list files in current directory
+🧠 LLM Output:
+{"action": "list_files"}
+✅ Validation Passed
+⚙️ Executing: {'action': 'list_files'}
+📂 Files: ['hello.py']
+
+✅ Result: 📂 Files: ['hello.py']
+
+Speak something...
+Recognizing
 You: "exit"
-Exiting CLI...
+👋 Exiting CLI...
 ```
 
 ---

@@ -30,7 +30,7 @@ def main():
                     {"text": command},
                     config={
                         "configurable": {
-                            "thread_id": "voice_session-2"
+                            "thread_id": "voice_session-1"
                         }
                     }
                 )
